@@ -61,14 +61,20 @@ def main(args):
         },
         'env_config': env_config,
     })
+
     trainer = ppo.PPOTrainer(
         config=config, env=SentPieceMLM,
     )
-    for i in range(1000):
-       # Perform one iteration of training the policy with PPO
-       result = trainer.train()
-       print(pretty_print(result))
 
+    try:
+        for i in range(1000):
+           # Perform one iteration of training the policy with PPO
+           result = trainer.train()
+           print(pretty_print(result))
+    except KeyboardInterrupt:
+        pass
+
+    ray.shutdown()
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
