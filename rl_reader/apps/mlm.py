@@ -40,21 +40,20 @@ def main(args):
         'num_envs_per_worker': args.num_envs_per_worker,
         'num_gpus': num_gpus_driver,
         'num_gpus_per_worker': num_gpus_worker,
-        'model': {
-            'use_lstm': True,
-        },
         'multiagent': {
             'policies': {
                 'cursor_policy': (
                     None, env.observation_space,
                     env.cursor_action_space, {
-                      'gamma': 0.9
+                        'use_lstm': True,
+                        'gamma': 0.9
                     }
                 ),
                 'token_policy': (
                     None, env.observation_space,
                     env.token_action_space, {
-                        'gamma': 0.0
+                        'use_lstm': True,
+                        'gamma': 0.9
                     }
                 ),
             },
