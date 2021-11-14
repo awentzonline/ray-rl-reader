@@ -37,6 +37,7 @@ def main(args):
         'num_workers': args.num_procs,
         # 'num_cpus_for_driver': cpus_per_worker,
         # 'num_cpus_per_worker': cpus_per_worker,
+        'num_envs_per_worker': args.num_envs_per_worker,
         'num_gpus': num_gpus_driver,
         'num_gpus_per_worker': num_gpus_worker,
         'model': {
@@ -92,6 +93,7 @@ if __name__ == '__main__':
     p.add_argument('--num_steps', default=1024, type=int)
     p.add_argument('--total_steps', default=1E8, type=int)
     p.add_argument('--driver_gpu_ratio', default=0.2, type=float)
+    p.add_argument('--num_envs_per_worker', default=1, type=int)
     args = p.parse_args()
 
     main(args)
