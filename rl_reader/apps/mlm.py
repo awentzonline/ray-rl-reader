@@ -14,8 +14,12 @@ def main(args):
     resources = ray.available_resources()
     num_gpus_available = resources.get('GPU', 0)
     num_gpus_driver = num_gpus_available * args.driver_gpu_ratio
-    num_gpus_worker = (num_gpus_available - num_gpus_driver) / args.num_procs
-    cpus_per_worker = (1 + args.num_procs) / resources['CPU']
+    if args.num_procs:
+        num_gpus_worker = (num_gpus_available - num_gpus_driver) / args.num_procs
+        cpus_per_worker = (1 + args.num_procs) / resources['CPU']
+    else:
+        num_gpus_worker = 0
+        cpus_per_worker = 0
 
     config = ppo.DEFAULT_CONFIG.copy()
 
