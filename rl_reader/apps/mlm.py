@@ -45,14 +45,18 @@ def main(args):
                 'cursor_policy': (
                     None, env.observation_space,
                     env.cursor_action_space, {
-                        'use_lstm': True,
+                        'model': {
+                            'use_lstm': True,
+                        },
                         'gamma': 0.9
                     }
                 ),
                 'token_policy': (
                     None, env.observation_space,
                     env.token_action_space, {
-                        'use_lstm': True,
+                        'model': {
+                            'use_lstm': True,
+                        },
                         'gamma': 0.9
                     }
                 ),
