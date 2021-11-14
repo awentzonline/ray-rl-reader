@@ -113,16 +113,16 @@ class SentPieceMLM(MultiAgentEnv):
 
     def move_left(self):
         self.cursor = max(0, self.cursor - 1)
-        return {'cursor_agent': self.current_obs()}, 0, False
+        return {'cursor_agent': self.current_obs()}, self.base_reward, False
 
     def move_right(self):
         self.cursor = min(len(self.tokens) - 1, self.cursor + 1)
-        return {'cursor_agent': self.current_obs()}, 0, False
+        return {'cursor_agent': self.current_obs()}, self.base_reward, False
 
     def finished(self):
-        reward = (self.tokens == self.original_tokens).sum() / len(self.original_tokens)
+        reward = -(self.tokens != self.original_tokens).sum() / self.is_corrupt.sum()
         # print(self.render())
-        return {'cursor_agent': self.current_obs()}, 0, True
+        return {'cursor_agent': self.current_obs()}, self.base_reward, True
 
     def _token_step(self, new_token_id):
         self.marked_corrupt[self.cursor] = True
