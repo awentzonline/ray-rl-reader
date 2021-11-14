@@ -10,6 +10,11 @@ from rl_reader.envs.sentpiece_mlm import SentPieceMLM
 
 def main(args):
     ray.init()
+
+    num_gpus_available = len(ray.get_gpu_ids())
+    num_gpus_driver = num_gpus_available * args.driver_gpu_ratio
+    num_gpus_worker = (num_gpus_available - num_gpus_driver) / args.num_procs
+
     config = ppo.DEFAULT_CONFIG.copy()
 
     def policy_mapping_fn(agent_id, *args, **kwargs):
@@ -26,9 +31,10 @@ def main(args):
     env = SentPieceMLM(env_config)
 
     config.update({
-        'num_gpus': 0,
         'framework': 'torch',
         'num_workers': args.num_procs,
+        'num_gpus': num_gpus_driver,
+        'num_gpus_per_worker': num_gpus_worker,
         'model': {
             'use_lstm': True,
         },
@@ -75,6 +81,7 @@ if __name__ == '__main__':
     p.add_argument('--num_procs', default=multiprocessing.cpu_count(), type=int)
     p.add_argument('--num_steps', default=1024, type=int)
     p.add_argument('--total_steps', default=1E8, type=int)
+    p.add_argument('--driver_gpu_ratio', default=0.2, type=float)
     args = p.parse_args()
 
     main(args)
