@@ -156,7 +156,10 @@ class SentPieceMLM(MultiAgentEnv):
         return ' '.join(decoded)
 
     def load_docs(self, path, text_col='text'):
-        df = pd.read_pickle(path)
+        if path.endswith('.csv'):
+            df = pd.read_csv(path)
+        else:
+            df = pd.read_pickle(path)
         text = df[text_col]
         return text
 
