@@ -35,8 +35,8 @@ def main(args):
     config.update({
         'framework': 'torch',
         'num_workers': args.num_procs,
-        'num_cpus_for_driver': cpus_per_worker,
-        'num_cpus_per_worker': cpus_per_worker,
+        # 'num_cpus_for_driver': cpus_per_worker,
+        # 'num_cpus_per_worker': cpus_per_worker,
         'num_gpus': num_gpus_driver,
         'num_gpus_per_worker': num_gpus_worker,
         'model': {
