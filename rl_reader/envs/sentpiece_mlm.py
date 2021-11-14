@@ -122,7 +122,7 @@ class SentPieceMLM(MultiAgentEnv):
     def finished(self):
         reward = -(self.tokens != self.original_tokens).sum() / self.is_corrupt.sum()
         # print(self.render())
-        return {'cursor_agent': self.current_obs()}, self.base_reward, True
+        return {'cursor_agent': self.current_obs()}, reward + self.base_reward, True
 
     def _token_step(self, new_token_id):
         self.marked_corrupt[self.cursor] = True
