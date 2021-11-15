@@ -44,6 +44,8 @@ def main(args):
         'num_envs_per_worker': args.num_envs_per_worker,
         'num_gpus': num_gpus_driver,
         'num_gpus_per_worker': num_gpus_worker,
+        'train_batch_size': args.train_batch_size,
+        'sgd_minibatch_size': args.sgd_minibatch_size,
         'multiagent': {
             'policies': {
                 'cursor_policy': (
@@ -101,6 +103,8 @@ if __name__ == '__main__':
     p.add_argument('--total_steps', default=1E8, type=int)
     p.add_argument('--driver_gpu_ratio', default=0.2, type=float)
     p.add_argument('--num_envs_per_worker', default=1, type=int)
+    p.add_argument('--train_batch_size', default=4000, type=int)
+    p.add_argument('--sgd_minibatch_size', default=128, type=int)
     args = p.parse_args()
 
     main(args)
