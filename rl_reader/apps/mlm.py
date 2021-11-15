@@ -2,7 +2,7 @@ import multiprocessing
 
 import gym
 import ray
-import ray.rllib.agents.ppo as ppo
+from ray.rllib.agents import a3c, ppo
 from ray.tune.logger import pretty_print
 
 from rl_reader.envs.sentpiece_mlm import SentPieceMLM
@@ -21,7 +21,10 @@ def main(args):
         num_gpus_worker = 0
         cpus_per_worker = 0
 
-    config = ppo.DEFAULT_CONFIG.copy()
+    agent_module = dict(
+        ppo=ppo, a2c=a3c
+    )[args.agent]
+    config = agent_module.DEFAULT_CONFIG.copy()
 
     def policy_mapping_fn(agent_id, *args, **kwargs):
         if agent_id.startswith('token_'):
@@ -45,7 +48,6 @@ def main(args):
         'num_gpus': num_gpus_driver,
         'num_gpus_per_worker': num_gpus_worker,
         'train_batch_size': args.train_batch_size,
-        'sgd_minibatch_size': args.sgd_minibatch_size,
         'multiagent': {
             'policies': {
                 'cursor_policy': (
@@ -54,7 +56,6 @@ def main(args):
                         'model': {
                             'use_lstm': True,
                         },
-                        'gamma': 0.9
                     }
                 ),
                 'token_policy': (
@@ -63,7 +64,6 @@ def main(args):
                         'model': {
                             'use_lstm': True,
                         },
-                        'gamma': 0.9
                     }
                 ),
             },
@@ -71,8 +71,15 @@ def main(args):
         },
         'env_config': env_config,
     })
+    if 'sgd_minibatch_size' in config:
+        config['sgd_minibatch_size'] = args.sgd_minibatch_size
 
-    trainer = ppo.PPOTrainer(
+    trainer_cls = dict(
+        ppo=ppo.PPOTrainer,
+        a2c=a3c.A2CTrainer,
+        a3c=a3c.A3CTrainer,
+    )[args.agent]
+    trainer = trainer_cls(
         config=config, env=SentPieceMLM,
     )
 
@@ -105,6 +112,7 @@ if __name__ == '__main__':
     p.add_argument('--num_envs_per_worker', default=1, type=int)
     p.add_argument('--train_batch_size', default=4000, type=int)
     p.add_argument('--sgd_minibatch_size', default=128, type=int)
+    p.add_argument('--agent', default='ppo')
     args = p.parse_args()
 
     main(args)
