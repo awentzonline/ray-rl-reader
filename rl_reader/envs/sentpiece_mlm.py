@@ -56,7 +56,7 @@ class SentPieceMLM(MultiAgentEnv):
         self.original_tokens = copy(tokens)
         # corrupt the tokens
         num_tokens = len(tokens)
-        num_corrupted = int(num_tokens * self.corruption_rate)
+        num_corrupted = max(int(num_tokens * self.corruption_rate), 1)
         corrupted_indicies = np.random.choice(
             num_tokens, num_corrupted, replace=False
         ).astype(np.int32)
@@ -120,7 +120,10 @@ class SentPieceMLM(MultiAgentEnv):
         return {'cursor_agent': self.current_obs()}, self.base_reward, False
 
     def finished(self):
-        reward = -(self.tokens != self.original_tokens).sum() / self.is_corrupt.sum()
+        num_corrupt = self.is_corrupt.sum()
+        if num_corrupt == 0:
+            num_corrupt = 1
+        reward = -(self.tokens != self.original_tokens).sum() / num_corrupt
         # print(self.render())
         return {'cursor_agent': self.current_obs()}, reward + self.base_reward, True
 
