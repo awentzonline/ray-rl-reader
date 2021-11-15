@@ -136,10 +136,10 @@ class SentPieceMLM(MultiAgentEnv):
             if old_token_id == new_token_id:
                 reward = -1.
             else:
-                reward += token_was_masked * 2 - 1
+                reward += token_was_masked
                 new_token_is_correct = \
                     new_token_id == self.original_tokens[self.cursor]
-                reward += new_token_is_correct * 2 - 1
+                reward += new_token_is_correct
 
         self.tokens[self.cursor] = new_token_id
         obs = {
