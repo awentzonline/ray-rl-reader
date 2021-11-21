@@ -5,7 +5,7 @@ import ray
 from ray.rllib.agents import a3c, ppo
 from ray.tune.logger import pretty_print
 
-from rl_reader.envs.sentpiece_mlm import SentPieceMLM
+from rl_reader.envs.sentpiece_mlm_super import SentPieceMLM
 
 
 def main(args):
@@ -48,27 +48,6 @@ def main(args):
         'num_gpus': num_gpus_driver,
         'num_gpus_per_worker': num_gpus_worker,
         'train_batch_size': args.train_batch_size,
-        'multiagent': {
-            'policies': {
-                'cursor_policy': (
-                    None, env.observation_space,
-                    env.cursor_action_space, {
-                        'model': {
-                            'use_lstm': True,
-                        },
-                    }
-                ),
-                'token_policy': (
-                    None, env.observation_space,
-                    env.token_action_space, {
-                        'model': {
-                            'use_lstm': True,
-                        },
-                    }
-                ),
-            },
-            'policy_mapping_fn': policy_mapping_fn,
-        },
         'env_config': env_config,
     })
     if 'sgd_minibatch_size' in config:

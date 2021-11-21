@@ -8,9 +8,11 @@ from ray.rllib.env import MultiAgentEnv
 import torch
 from transformers import AutoTokenizer
 
+from .render_text import render_text
+
 
 class SentPieceMLM(MultiAgentEnv):
-    """Learn to fill in masked tokens"""
+    """Learn to fill in masked tokens using multiple agents."""
     cursor_actions = [
         'move_left',
         'move_right',
@@ -52,7 +54,11 @@ class SentPieceMLM(MultiAgentEnv):
         # corrupt the original tokens
         rand_doc_i = np.random.randint(len(self.docs))
         doc = self.docs[rand_doc_i]
-        tokens = np.array(self.tokenizer.encode(doc, truncation=True))
+        token_info = self.tokenizer(
+            doc, truncation=True, return_offsets_mapping=True
+        )
+        self.token_offset_mapping = token_info.offset_mapping
+        tokens = np.array(token_info.input_ids)
         self.original_tokens = copy(tokens)
         # corrupt the tokens
         num_tokens = len(tokens)
@@ -109,6 +115,8 @@ class SentPieceMLM(MultiAgentEnv):
             self.num_cursor_steps
         )
         reward = {'token_agent': self.base_reward}
+        if np.random.uniform() < 0.01:
+            print(self.render())
         return {self.token_agent_id: self.current_obs()}, reward, False
 
     def move_left(self):
@@ -156,7 +164,16 @@ class SentPieceMLM(MultiAgentEnv):
 
     def render(self, *args, **kwargs):
         decoded = self.tokenizer.convert_ids_to_tokens(self.tokens)
-        return ' '.join(decoded)
+        # decoded = self.tokenizer.decode(self.tokens)
+        correct = self.tokens == self.original_tokens
+        return render_text(
+            decoded, correct, self.marked_corrupt, self.is_corrupt,
+        )
+        # return render_text(
+        #     decoded, correct, self.marked_corrupt, self.is_corrupt,
+        #     self.token_offset_mapping
+        # )
+        # return ' '.join(decoded)
 
     def load_docs(self, path, text_col='text'):
         if path.endswith('.csv'):
