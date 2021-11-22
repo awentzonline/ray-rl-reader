@@ -37,6 +37,7 @@ def main(args):
         'nlp_model_name': args.model_name,
         'corpus_path': args.corpus_path,
         'text_col': args.text_col,
+        'base_reward': args.base_reward,
     }
     env = SentPieceMLM(env_config)
 
@@ -95,6 +96,7 @@ if __name__ == '__main__':
     p.add_argument('--train_batch_size', default=4000, type=int)
     p.add_argument('--sgd_minibatch_size', default=128, type=int)
     p.add_argument('--agent', default='ppo')
+    p.add_argument('--base_reward', default=-0.1, type=float)
     args = p.parse_args()
 
     main(args)
