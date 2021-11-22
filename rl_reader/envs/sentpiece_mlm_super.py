@@ -25,7 +25,7 @@ class SentPieceMLM(gym.Env):
 
     def __init__(self, env_config):
         self.setup(env_config)
-        self.corruption_rate = env_config.get('corruption_rate', 0.2)
+        self.corruption_rate = env_config.get('corruption_rate', 0.15)
         self.reward_exploration = env_config.get('reward_exploration', False)
         self.base_reward = env_config.get('base_reward', -0.1)
         self.informative_reward = env_config.get('informative_reward', True)
