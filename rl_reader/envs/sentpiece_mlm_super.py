@@ -112,9 +112,10 @@ class SentPieceMLM(gym.Env):
             else:
                 if not self.marked_corrupt[self.cursor]:
                     reward += token_was_masked
-                new_token_is_correct = \
-                    new_token_id == self.original_tokens[self.cursor]
-                reward += new_token_is_correct
+                if token_was_masked:
+                    new_token_is_correct = \
+                        new_token_id == self.original_tokens[self.cursor]
+                    reward += new_token_is_correct
         self.marked_corrupt[self.cursor] = True
         self.tokens[self.cursor] = new_token_id
         obs = self.current_obs()
