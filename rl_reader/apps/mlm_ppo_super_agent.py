@@ -2,6 +2,7 @@ import multiprocessing
 
 import gym
 import ray
+from ray import tune
 from ray.rllib.agents import a3c, ppo
 from ray.tune.logger import pretty_print
 
@@ -22,16 +23,7 @@ def main(args):
         num_gpus_worker = 0
         cpus_per_worker = 0
 
-    agent_module = dict(
-        ppo=ppo, a2c=a3c
-    )[args.agent]
-    config = agent_module.DEFAULT_CONFIG.copy()
-
-    def policy_mapping_fn(agent_id, *args, **kwargs):
-        if agent_id.startswith('token_'):
-            return 'token_policy'
-        else:
-            return 'cursor_policy'
+    config = {}
 
     env_config = {
         'nlp_model_name': args.model_name,
@@ -39,7 +31,6 @@ def main(args):
         'text_col': args.text_col,
         'base_reward': args.base_reward,
     }
-    env = SentPieceMLM(env_config)
 
     config.update({
         'framework': 'torch',
@@ -52,26 +43,18 @@ def main(args):
         'train_batch_size': args.train_batch_size,
         'env_config': env_config,
         'callbacks': RenderTextCallback,
+        'env': SentPieceMLM,
     })
     if 'sgd_minibatch_size' in config:
         config['sgd_minibatch_size'] = args.sgd_minibatch_size
 
-    trainer_cls = dict(
-        ppo=ppo.PPOTrainer,
-        a2c=a3c.A2CTrainer,
-        a3c=a3c.A3CTrainer,
-    )[args.agent]
-    trainer = trainer_cls(
-        config=config, env=SentPieceMLM,
+    stop = dict(
+        timesteps_total=args.total_steps
     )
-
-    try:
-        for i in range(1000):
-           # Perform one iteration of training the policy with PPO
-           result = trainer.train()
-           print(pretty_print(result))
-    except KeyboardInterrupt:
-        pass
+    results = tune.run(
+        args.agent, config=config, stop=stop,
+        verbose=args.verbose
+    )
 
     ray.shutdown()
 
@@ -95,8 +78,9 @@ if __name__ == '__main__':
     p.add_argument('--num_envs_per_worker', default=1, type=int)
     p.add_argument('--train_batch_size', default=4000, type=int)
     p.add_argument('--sgd_minibatch_size', default=128, type=int)
-    p.add_argument('--agent', default='ppo')
+    p.add_argument('--agent', default='PPO')
     p.add_argument('--base_reward', default=-0.1, type=float)
+    p.add_argument('--verbose', default=2, type=int)
     args = p.parse_args()
 
     main(args)
