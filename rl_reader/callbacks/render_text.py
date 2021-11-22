@@ -12,5 +12,6 @@ class RenderTextCallback(DefaultCallbacks):
     def on_episode_end(self, *, worker: RolloutWorker, base_env: BaseEnv,
                        policies: Dict[str, Policy], episode: MultiAgentEpisode,
                        env_index: int, **kwargs):
-        if np.random.uniform() < 0.1:
-            print(base_env.vector_env.envs[0].render())
+        env = base_env.vector_env.envs[0]
+        if np.random.uniform() < env.num_cursor_steps / 1000:
+            print(env.render())
