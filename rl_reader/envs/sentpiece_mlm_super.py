@@ -103,7 +103,6 @@ class SentPieceMLM(gym.Env):
         return obs, reward, is_done, info
 
     def set_token(self, new_token_id):
-        self.marked_corrupt[self.cursor] = True
         reward = 0.
         if self.informative_reward:
             old_token_id = self.tokens[self.cursor]
@@ -116,7 +115,7 @@ class SentPieceMLM(gym.Env):
                 new_token_is_correct = \
                     new_token_id == self.original_tokens[self.cursor]
                 reward += new_token_is_correct
-
+        self.marked_corrupt[self.cursor] = True
         self.tokens[self.cursor] = new_token_id
         obs = self.current_obs()
         is_done = False
