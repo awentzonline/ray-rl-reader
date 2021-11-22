@@ -5,6 +5,7 @@ import ray
 from ray.rllib.agents import a3c, ppo
 from ray.tune.logger import pretty_print
 
+from rl_reader.callbacks.render_text import RenderTextCallback
 from rl_reader.envs.sentpiece_mlm_super import SentPieceMLM
 
 
@@ -49,6 +50,7 @@ def main(args):
         'num_gpus_per_worker': num_gpus_worker,
         'train_batch_size': args.train_batch_size,
         'env_config': env_config,
+        'callbacks': RenderTextCallback,
     })
     if 'sgd_minibatch_size' in config:
         config['sgd_minibatch_size'] = args.sgd_minibatch_size
@@ -71,6 +73,7 @@ def main(args):
         pass
 
     ray.shutdown()
+
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

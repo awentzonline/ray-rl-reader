@@ -111,7 +111,8 @@ class SentPieceMLM(gym.Env):
             if old_token_id == new_token_id:
                 reward = -1.
             else:
-                reward += token_was_masked
+                if not self.marked_corrupt[self.cursor]:
+                    reward += token_was_masked
                 new_token_is_correct = \
                     new_token_id == self.original_tokens[self.cursor]
                 reward += new_token_is_correct
@@ -135,7 +136,6 @@ class SentPieceMLM(gym.Env):
         if num_corrupt == 0:
             num_corrupt = 1
         reward = -(self.tokens != self.original_tokens).sum() / num_corrupt
-        # print(self.render())
         return self.current_obs(), reward + self.base_reward, True, {}
 
     def render(self, *args, **kwargs):
