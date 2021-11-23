@@ -53,7 +53,8 @@ def main(args):
     )
     results = tune.run(
         args.agent, config=config, stop=stop,
-        verbose=args.verbose, resume=args.resume
+        verbose=args.verbose, resume=args.resume,
+        local_dir=args.results_dir
     )
 
     ray.shutdown()
@@ -82,6 +83,7 @@ if __name__ == '__main__':
     p.add_argument('--base_reward', default=-0.1, type=float)
     p.add_argument('--verbose', default=2, type=int)
     p.add_argument('--resume', action='store_true')
+    p.add_argument('--results_dir', default=None)
     args = p.parse_args()
 
     main(args)
