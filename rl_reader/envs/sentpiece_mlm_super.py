@@ -76,6 +76,7 @@ class SentPieceMLM(gym.Env):
         # reset env state
         self.marked_corrupt = np.zeros((len(tokens),)).astype(np.bool)
         self.visited = np.zeros((len(tokens),)).astype(np.bool)
+        self.correct_update = np.zeros((len(tokens),)).astype(np.bool)
         self.cursor = 0
 
         self.num_cursor_steps = 0
@@ -103,19 +104,35 @@ class SentPieceMLM(gym.Env):
         return obs, reward, is_done, info
 
     def set_token(self, new_token_id):
+        """
+        Positive reward if:
+         R1) token being set is a corrupted token and not previously set
+         R2) token is set correctly and was not previously set correctly
+        Negative reward if:
+         R3) token being set was not corrupted
+         R4) token set to incorrect value
+         R5) token being set to current value
+        """
         reward = 0.
         if self.informative_reward:
             old_token_id = self.tokens[self.cursor]
             token_was_masked = self.is_corrupt[self.cursor]
             if old_token_id == new_token_id:
-                reward = -1.
+                reward = -1.  # R5
             else:
-                if not self.marked_corrupt[self.cursor]:
-                    reward += token_was_masked
                 if token_was_masked:
+                    if not self.marked_corrupt[self.cursor]:
+                        reward += 1.  # R1
                     new_token_is_correct = \
                         new_token_id == self.original_tokens[self.cursor]
-                    reward += new_token_is_correct
+                    if new_token_is_correct:
+                        if not self.correct_update[self.cursor]:
+                            reward += 1.  # R2
+                    else:
+                        reward -= 1.  # R4
+                else:
+                    reward -= 1.  # R3
+                
         self.marked_corrupt[self.cursor] = True
         self.tokens[self.cursor] = new_token_id
         obs = self.current_obs()
